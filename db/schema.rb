@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_03_130012) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_04_200608) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_03_130012) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "book_copies", force: :cascade do |t|
+    t.bigint "book_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_book_copies_on_book_id"
+  end
+
   create_table "books", force: :cascade do |t|
     t.integer "author_id"
     t.integer "library_id"
@@ -49,6 +56,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_03_130012) do
     t.integer "published_year"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "read_period"
     t.index ["author_id"], name: "index_books_on_author_id"
     t.index ["library_id"], name: "index_books_on_library_id"
   end
@@ -62,15 +70,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_03_130012) do
   create_table "readings", force: :cascade do |t|
     t.integer "user_id"
     t.integer "library_id"
-    t.integer "book_id"
     t.integer "status", default: 0
-    t.integer "use_period"
     t.datetime "signed_at"
     t.datetime "returned_at"
     t.integer "return_library_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["book_id"], name: "index_readings_on_book_id"
+    t.integer "book_copy_id"
+    t.datetime "to_return_at"
+    t.index ["book_copy_id"], name: "index_readings_on_book_copy_id"
     t.index ["library_id"], name: "index_readings_on_library_id"
     t.index ["return_library_id"], name: "index_readings_on_return_library_id"
     t.index ["user_id"], name: "index_readings_on_user_id"
@@ -85,4 +93,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_02_03_130012) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "book_copies", "books"
 end
