@@ -15,10 +15,11 @@ class Book < ApplicationRecord
   end
 
   def self.most_popular
-    top_books = Reading.joins(:book_copy)
+    top_book_ids = Reading.joins(:book_copy)
       .group("book_copies.book_id")
-      .count.sort_by{|k_, v| v}.to_h
-    Book.where(id: top_books.keys)
+      .count.sort_by{|k_, v| v}
+      .to_h.keys
+    Book.where(id: top_book_ids.keys)
   end
 
   def cover_url

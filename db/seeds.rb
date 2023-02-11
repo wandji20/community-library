@@ -16,7 +16,7 @@ class DatabaseBuilder
   end
 
   def destroy_data
-    [ActiveStorage::Attachment, ActiveStorage::Blob, Reading, Book, Library, User].each do |klass|
+    [ActiveStorage::Attachment, ActiveStorage::Blob, Reading, BookCopy, Book, Library, User].each do |klass|
       klass.destroy_all
       klass.connection.reset_pk_sequence!(klass.table_name, 'id')
     end
@@ -85,20 +85,31 @@ class DatabaseBuilder
   def create_readings
     user_ids = User.order(id: :asc).take(40).pluck(:id)
     library_ids = Library.pluck(:id)
-    BookCopy.all.shuffle.slice(rand(50..100), BookCopy.count).each do |copy|
-      rand(2..15).times do |i|
-        attr = {
-          book_copy_id: copy.id,
-          user_id: user_ids.sample,
-          library_id: copy.book.library_id,
-          status: [0,1,2,3].sample,
-          signed_at: i.days.try([:ago, :from_now].sample),
-          return_library_id: library_ids.sample
-        }
-        attr[:returned_at] = attr[:signed_at] + rand(1..8).days
-        attr[:to_return_at] = attr[:signed_at] + copy.book.read_period.days
-        attr[:status] = 1 if DateTime.now < attr[:to_return_at]
-        Reading.create!(attr)
+    Book.all.each do |book|
+      book.copies.each do |copy|
+        20.times do |i|
+          attr = {
+            book_copy_id: copy.id,
+            user_id: user_ids.sample,
+            library_id: book.library_id,
+            status: [0,1,2,3].sample,
+            signed_at: rand(1..90).days.ago,
+          }
+          attr[:to_return_at] = attr[:signed_at] + copy.book.read_period.days 
+          if (attr[:signed_at] + copy.book.read_period.days) >= DateTime.now
+            attr[:status] = 1
+          elsif (attr[:signed_at] + copy.book.read_period.days) < attr[:to_return_at]
+            attr[:status] = [0,2,3,4].sample
+          end
+          if attr[:status] == 1
+            next if copy.readings.active.any? 
+          end
+          if attr[:status] == 2
+            attr[:returned_at] = attr[:signed_at] + rand(1..copy.book.read_period).days
+            attr[:return_library_id] = library_ids.sample
+          end
+          Reading.create!(attr)
+        end
       end
     end
   end

@@ -27,5 +27,11 @@ module Types
     def book(params)
       Book.find_by(params)
     end
+
+    field :authors, [Types::UserType], null: false
+
+    def authors
+      User.joins(:authored_books)
+    end
   end
 end
