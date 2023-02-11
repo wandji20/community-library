@@ -38,6 +38,8 @@ gem "image_processing", "~> 1.2"
 
 gem 'graphql'
 
+gem 'batch-loader'
+
 group :development, :test do
   gem 'faker'
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
