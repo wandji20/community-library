@@ -1,5 +1,7 @@
 module Types
   class BookType < Types::BaseObject
+    include Loaders::BookType
+    
     field :id, Integer, null: false
     field :title, String, null: false
     field :published_year, Integer, null: false
