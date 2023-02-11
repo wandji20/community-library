@@ -19,7 +19,7 @@ class Book < ApplicationRecord
       .group("book_copies.book_id")
       .count.sort_by{|k_, v| v}
       .to_h.keys
-    Book.where(id: top_book_ids.keys)
+    Book.where(id: top_book_ids)
   end
 
   def cover_url
